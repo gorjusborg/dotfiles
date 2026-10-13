@@ -1,0 +1,19 @@
+{{ if and (ne .chezmoi.os "windows") (not .ephemeral) -}}
+#!/bin/sh
+# Install Lua rocks on new machines; existing installs (e.g. a dev build of tn)
+# are left alone.
+set -eu
+
+if ! command -v mise >/dev/null 2>&1; then
+  echo "mise not found; skipping lua rocks" >&2
+  exit 0
+fi
+
+luarocks() {
+  mise exec lua@5.1.5 -- luarocks "$@"
+}
+
+if ! luarocks show tn >/dev/null 2>&1; then
+  luarocks install tn 0.3.4-1
+fi
+{{ end -}}

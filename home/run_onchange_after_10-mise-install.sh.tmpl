@@ -1,0 +1,13 @@
+{{ if ne .chezmoi.os "windows" -}}
+#!/bin/sh
+# Install mise tools whenever the rendered mise config changes.
+# mise config hash: {{ includeTemplate "dot_config/mise/config.toml.tmpl" . | sha256sum }}
+set -eu
+
+if ! command -v mise >/dev/null 2>&1; then
+  echo "mise not found; skipping 'mise install'" >&2
+  exit 0
+fi
+
+mise install
+{{ end -}}
