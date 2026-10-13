@@ -1,0 +1,84 @@
+{{- /*
+  Generates ~/.config/chezmoi/chezmoi.toml on `chezmoi init`.
+  Answers are remembered; re-ask with `chezmoi init --prompt`.
+  Non-interactive: `chezmoi init --promptDefaults`, or answer by prompt text,
+  e.g. `--promptBool "Work machine"=true`.
+*/ -}}
+
+{{- /* OS + distro in one value, per chezmoi's Linux guide: darwin, windows, linux-arch, linux-debian, ... */ -}}
+{{- $osid := .chezmoi.os -}}
+{{- if hasKey .chezmoi.osRelease "id" -}}
+{{-   $osid = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
+{{- end -}}
+
+{{- /* Stable hostname, per chezmoi's macOS guide (`hostname` varies with the network there) */ -}}
+{{- $hostname := .chezmoi.hostname -}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{-   $hostname = output "scutil" "--get" "ComputerName" | trim -}}
+{{- end -}}
+
+{{- /* WSL detection, per chezmoi's Windows guide */ -}}
+{{- $wsl := false -}}
+{{- if eq .chezmoi.os "linux" -}}
+{{-   if .chezmoi.kernel.osrelease | lower | contains "microsoft" -}}
+{{-     $wsl = true -}}
+{{-   end -}}
+{{- end -}}
+
+{{- /* Containers (devcontainers, Codespaces, docker/podman) get a minimal, prompt-free, secret-free setup */ -}}
+{{- $ephemeral := or (env "CODESPACES") (env "REMOTE_CONTAINERS") (stat "/.dockerenv") (stat "/run/.containerenv") | not | not -}}
+
+{{- $work := false -}}
+{{- $notesDir := "mega/tn/notes" -}}
+{{- $sshKeyPersonal := "~/.ssh/id_ed25519" -}}
+{{- $sshKeyWork := "" -}}
+{{- $workGitName := "" -}}
+{{- $workGitEmail := "" -}}
+{{- $workJavaTrustStore := "" -}}
+{{- $keepassxcDb := "" -}}
+{{- if not $ephemeral -}}
+{{-   $work = promptBoolOnce . "work" "Work machine" false -}}
+{{-   $notesDir = promptStringOnce . "notesDir" "Notes directory, relative to home" $notesDir -}}
+{{-   $sshKeyPersonal = promptStringOnce . "sshKeyPersonal" "Personal git SSH key" $sshKeyPersonal -}}
+{{-   if $work -}}
+{{-     $sshKeyWork = promptStringOnce . "sshKeyWork" "Work git SSH key" "~/.ssh/id_ed25519" -}}
+{{-     $workGitName = promptStringOnce . "workGitName" "Work git name" -}}
+{{-     $workGitEmail = promptStringOnce . "workGitEmail" "Work git email" -}}
+{{-     $workJavaTrustStore = promptStringOnce . "workJavaTrustStore" "Work Java truststore path (blank for none)" "" -}}
+{{-   end -}}
+{{-   $keepassxcDb = promptStringOnce . "keepassxcDb" "KeePassXC database path (blank to disable secrets)" "" -}}
+{{- end -}}
+{{- $secrets := ne $keepassxcDb "" -}}
+{{- $keepassxcPath := $keepassxcDb -}}
+{{- if hasPrefix "~/" $keepassxcPath -}}
+{{-   $keepassxcPath = joinPath .chezmoi.homeDir (trimPrefix "~/" $keepassxcPath) -}}
+{{- end -}}
+
+[data]
+    osid = {{ $osid | quote }}
+    hostname = {{ $hostname | quote }}
+    wsl = {{ $wsl }}
+    ephemeral = {{ $ephemeral }}
+    secrets = {{ $secrets }}
+    work = {{ $work }}
+    notesDir = {{ $notesDir | quote }}
+    sshKeyPersonal = {{ $sshKeyPersonal | quote }}
+    sshKeyWork = {{ $sshKeyWork | quote }}
+    workGitName = {{ $workGitName | quote }}
+    workGitEmail = {{ $workGitEmail | quote }}
+    workJavaTrustStore = {{ $workJavaTrustStore | quote }}
+    keepassxcDb = {{ $keepassxcDb | quote }}
+
+[add]
+    secrets = "error"
+{{- if $secrets }}
+
+[keepassxc]
+    database = {{ $keepassxcPath | quote }}
+{{- end }}
+{{- if and (eq .chezmoi.os "windows") (lookPath "pwsh") }}
+
+[interpreters.ps1]
+    command = "pwsh"
+    args = ["-NoLogo"]
+{{- end }}

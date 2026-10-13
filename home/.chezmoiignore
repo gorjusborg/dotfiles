@@ -1,0 +1,20 @@
+{{- /* Target paths that should not exist on this machine. */ -}}
+
+{{ if eq .chezmoi.os "windows" }}
+.bashrc
+.profile
+.tmux.conf
+.local/bin
+.config/ghostty
+{{ else }}
+Documents/PowerShell
+Documents/WindowsPowerShell
+{{ end }}
+
+{{ if not .work }}
+.gitconfig-work
+{{ end }}
+
+{{ if not .secrets }}
+.secrets
+{{ end }}

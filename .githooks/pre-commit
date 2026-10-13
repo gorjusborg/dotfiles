@@ -1,0 +1,12 @@
+#!/bin/sh
+# Block commits that contain secrets. Enable with:
+#   git config core.hooksPath .githooks
+set -eu
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "pre-commit: gitleaks not found; refusing to commit unscanned changes." >&2
+  echo "pre-commit: install it (it is in the shared mise config: run 'mise install') and retry." >&2
+  exit 1
+fi
+
+exec gitleaks git --staged --redact --no-banner
