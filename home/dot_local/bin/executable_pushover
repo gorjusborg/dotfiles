@@ -1,0 +1,40 @@
+#!/usr/bin/env bb
+;; vi: syntax=clojure
+
+;; A dirty cli to send myself messages via the Pushover API
+;; (https://pushover.net/api)
+
+(ns pushover.core
+  (:require [babashka.http-client :as http]
+            [cheshire.core :as json]))
+
+(def ^:private vars
+  {:url (or 
+        (System/getenv "PUSHOVER_URL") 
+        "https://api.pushover.net/1/messages.json")
+  :token (System/getenv "PUSHOVER_APP_TOKEN")
+  :user (System/getenv "PUSHOVER_USER_TOKEN")})
+
+(defn- exit 
+  ([msg] (exit msg 0))
+  ([msg status] 
+   (do
+      (.println *err* msg)
+      (System/exit status))))
+
+
+(let [[firstArg] *command-line-args*
+      message (or firstArg (slurp "/dev/stdin"))
+      url (:url vars)
+      token (:token vars)
+      user (:user vars)] 
+
+      (try
+        (do
+          (http/post 
+            (:url vars) 
+            {:headers {:content-type "application/json"}
+             :body (json/encode {:token token :user user :message message})})
+          (exit (str "sent")))
+        (catch Exception e
+          (exit (str "failed: " e) 1))))
