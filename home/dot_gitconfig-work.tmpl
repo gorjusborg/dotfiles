@@ -1,0 +1,7 @@
+[user]
+  name = {{ .workGitName }}
+  email = {{ .workGitEmail }}
+  useConfigOnly = true
+
+[core]
+  sshCommand = "ssh -i {{ .sshKeyWork }}"

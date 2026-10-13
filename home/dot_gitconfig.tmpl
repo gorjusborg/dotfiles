@@ -1,0 +1,33 @@
+[include]
+  path = ~/.gitconfig-shared
+
+{{ if .work -}}
+# work machine: work identity by default, personal identity for personal repos
+[include]
+  path = ~/.gitconfig-work
+
+[includeIf "gitdir:~/code/gh/personal/"]
+  path = ~/.gitconfig-personal
+
+[includeIf "gitdir:~/.local/share/chezmoi/"]
+  path = ~/.gitconfig-personal
+
+[includeIf "gitdir:~/.dotfiles/"]
+  path = ~/.gitconfig-personal
+{{- else -}}
+[include]
+  path = ~/.gitconfig-personal
+{{- end }}
+{{- $gh := lookPath "gh" -}}
+{{- if and $gh (not .ephemeral) -}}
+{{-   if eq .chezmoi.os "windows" -}}
+{{-     $gh = "gh" -}}
+{{-   end }}
+
+[credential "https://github.com"]
+	helper =
+	helper = !{{ $gh }} auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !{{ $gh }} auth git-credential
+{{- end }}

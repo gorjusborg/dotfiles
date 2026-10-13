@@ -1,0 +1,65 @@
+[alias]
+  lg = log --graph --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
+  out = log --pretty=oneline --abbrev-commit --graph @{u}..
+  in = !git fetch && git log --pretty=oneline --abbrev-commit --graph ..@{u}
+  ff = merge --ff-only @{u}
+  unmerged = diff --name-only --diff-filter=U
+  sha = rev-parse @
+  ssha = rev-parse --short @
+  s = switch
+  fp = push --force-with-lease --force-if-includes
+
+[push]
+  default = simple
+
+[filter "lfs"]
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
+
+# Linux
+# add the following to "~/.gitconfig" file
+
+[merge]
+  tool = vimdiff
+  conflictstyle = diff3
+
+
+[diff]
+  tool = vimdiff
+  conflictstyle = diff3
+
+[mergetool]
+  prompt = false
+  keepBackup = false
+  keepTemporaries = false
+  conflictstyle = diff3
+
+[mergetool "vimdiff"]
+  path = nvim
+
+[mergetool "vscode"]
+  cmd = code --wait --merge $REMOTE $LOCAL $BASE $MERGED
+
+[difftool]
+  prompt = false
+  keepBackup = false
+  trustExitCode = false
+  conflictstyle = diff3
+
+
+[difftool "vimdiff"]
+  path = nvim
+
+[difftool "vscode"]
+  cmd = code --wait --diff $LOCAL $REMOTE
+
+[init]
+  defaultBranch = main
+[core]
+  excludesfile = ~/.gitignore
+
+[tig "color"]
+  cursor = black blue bold
+  cursor-blur = black blue dim

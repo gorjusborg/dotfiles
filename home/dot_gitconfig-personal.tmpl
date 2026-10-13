@@ -1,0 +1,9 @@
+[user]
+  name = gorjusborg
+  email = 764157+gorjusborg@users.noreply.github.com
+  useConfigOnly = true
+{{- if not .ephemeral }}
+
+[core]
+  sshCommand = "ssh -i {{ .sshKeyPersonal }}"
+{{- end }}
