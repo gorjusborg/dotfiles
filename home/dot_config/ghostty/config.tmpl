@@ -1,0 +1,19 @@
+# Ghostty config; see https://ghostty.org/docs/config
+# Run `ghostty +show-config --default --docs` for all options and defaults.
+
+quit-after-last-window-closed = true
+
+{{ $bash := "/bin/bash" -}}
+{{ if eq .chezmoi.os "darwin" -}}
+{{   $bash = "/opt/homebrew/bin/bash" -}}
+{{ end -}}
+# first window starts tmux (via .bashrc); later windows/tabs skip it
+initial-command = {{ $bash }} -l
+command = env TMUX=1 {{ $bash }} -l
+{{- if eq .chezmoi.os "darwin" }}
+
+macos-titlebar-style = tabs
+{{- else }}
+
+gtk-tabs-location = hidden
+{{- end }}
