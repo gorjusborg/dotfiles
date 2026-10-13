@@ -2,6 +2,7 @@
 #!/bin/sh
 # Install mise tools whenever the rendered mise config changes.
 # mise config hash: {{ includeTemplate "dot_config/mise/config.toml.tmpl" . | sha256sum }}
+# mise available: {{ lookPath "mise" | not | not }}
 set -eu
 
 if ! command -v mise >/dev/null 2>&1; then

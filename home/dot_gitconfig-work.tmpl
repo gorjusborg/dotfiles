@@ -4,4 +4,4 @@
   useConfigOnly = true
 
 [core]
-  sshCommand = "ssh -i {{ .sshKeyWork }}"
+  sshCommand = "ssh -i {{ .sshKeyWork }} -o IdentitiesOnly=yes"

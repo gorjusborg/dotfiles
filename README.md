@@ -17,23 +17,44 @@ Windows (PowerShell):
 iex "&{$(irm 'https://get.chezmoi.io/ps1')} -- init --apply gorjusborg"
 ```
 
-Devcontainers / Codespaces run `install.sh`, which applies non-interactively
-with no secrets.
+Devcontainers / Codespaces run `install.sh`, which installs mise and chezmoi
+if needed and applies non-interactively, with no secrets and only the
+editor/shell tools.
 
-`chezmoi init` asks a few questions per machine. Re-ask with
-`chezmoi init --prompt`.
+## Per-machine settings
+
+`chezmoi init` asks once per machine and remembers the answers in
+`~/.config/chezmoi/chezmoi.toml`:
+
+- whether this is a work machine
+- notes directory (relative to home)
+- personal git SSH key; on work machines also the work SSH key, work git
+  name/email, and an optional Java truststore
+- KeePassXC database path (blank disables secrets)
+
+Re-ask with `chezmoi init --prompt`. OS, distro, WSL, and containers are
+detected automatically.
+
+Work-specific shell setup that doesn't belong in this repo goes in
+`~/.work.bashrc`, which `.bashrc` sources if present.
 
 ## Secrets
 
 Secrets come only from KeePassXC at apply time; nothing secret is committed.
-Leaving the KeePassXC database path blank on `chezmoi init` disables secrets
-on that machine.
+`~/.secrets` (mode 0600) is rendered from KeePassXC entries and sourced by
+`.bashrc`.
 
 Enable the secret-scanning pre-commit hook in each clone you commit from:
 
 ```sh
 git config core.hooksPath .githooks
 ```
+
+## Tools
+
+`~/.config/mise/config.toml` lists the tools mise manages. `chezmoi apply`
+runs `mise install` whenever that list changes, and installs the `tn` Lua rock
+on machines that don't have it yet. Building some tools needs a C compiler.
 
 ## Neovim plugin lock file
 

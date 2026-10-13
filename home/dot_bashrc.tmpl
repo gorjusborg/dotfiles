@@ -209,7 +209,7 @@ if [ -f "$HOME/.schemaspy/schemaspy.jar" ]; then
 fi
 
 function vpr() {
-  local base_branch="${1:-'main'}"
+  local base_branch="${1:-main}"
   nvim . -c ":DiffviewFileHistory --range=${base_branch}..HEAD --no-merges --reverse"
 }
 

@@ -4,6 +4,12 @@
 set -eu
 
 bin_dir="$HOME/.local/bin"
+export PATH="$bin_dir:$PATH"
+
+if ! command -v mise >/dev/null 2>&1; then
+  curl -fsSL https://mise.run | MISE_INSTALL_PATH="$bin_dir/mise" sh
+fi
+
 if ! chezmoi="$(command -v chezmoi)"; then
   sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$bin_dir"
   chezmoi="$bin_dir/chezmoi"

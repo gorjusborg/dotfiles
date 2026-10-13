@@ -5,5 +5,5 @@
 {{- if not .ephemeral }}
 
 [core]
-  sshCommand = "ssh -i {{ .sshKeyPersonal }}"
+  sshCommand = "ssh -i {{ .sshKeyPersonal }} -o IdentitiesOnly=yes"
 {{- end }}

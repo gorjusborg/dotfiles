@@ -2,6 +2,7 @@
 #!/bin/sh
 # Install Lua rocks on new machines; existing installs (e.g. a dev build of tn)
 # are left alone.
+# mise available: {{ lookPath "mise" | not | not }}
 set -eu
 
 if ! command -v mise >/dev/null 2>&1; then
