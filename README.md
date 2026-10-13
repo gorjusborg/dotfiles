@@ -30,7 +30,8 @@ editor/shell tools.
 - notes directory (relative to home)
 - personal git SSH key; on work machines also the work SSH key, work git
   name/email, and an optional Java truststore
-- KeePassXC database path (blank disables secrets)
+- KeePassXC database path (blank disables secrets), and if set, an optional
+  YubiKey slot[:serial] for challenge-response (unlocks once per apply)
 
 Re-ask with `chezmoi init --prompt`. OS, distro, WSL, and containers are
 detected automatically.

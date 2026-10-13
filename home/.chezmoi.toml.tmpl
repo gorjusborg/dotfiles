@@ -36,6 +36,7 @@
 {{- $workGitEmail := "" -}}
 {{- $workJavaTrustStore := "" -}}
 {{- $keepassxcDb := "" -}}
+{{- $keepassxcYubikey := "" -}}
 {{- if not $ephemeral -}}
 {{-   $work = promptBoolOnce . "work" "Work machine" false -}}
 {{-   $notesDir = promptStringOnce . "notesDir" "Notes directory, relative to home" $notesDir -}}
@@ -47,6 +48,9 @@
 {{-     $workJavaTrustStore = promptStringOnce . "workJavaTrustStore" "Work Java truststore path (blank for none)" "" -}}
 {{-   end -}}
 {{-   $keepassxcDb = promptStringOnce . "keepassxcDb" "KeePassXC database path (blank to disable secrets)" "" -}}
+{{-   if $keepassxcDb -}}
+{{-     $keepassxcYubikey = promptStringOnce . "keepassxcYubikey" "KeePassXC YubiKey slot[:serial] (blank for none)" "" -}}
+{{-   end -}}
 {{- end -}}
 {{- $secrets := ne $keepassxcDb "" -}}
 {{- $keepassxcPath := $keepassxcDb -}}
@@ -68,6 +72,7 @@
     workGitEmail = {{ $workGitEmail | quote }}
     workJavaTrustStore = {{ $workJavaTrustStore | quote }}
     keepassxcDb = {{ $keepassxcDb | quote }}
+    keepassxcYubikey = {{ $keepassxcYubikey | quote }}
 
 [add]
     secrets = "error"
@@ -75,6 +80,11 @@
 
 [keepassxc]
     database = {{ $keepassxcPath | quote }}
+{{- if $keepassxcYubikey }}
+    # one keepassxc-cli session per run: a single password + YubiKey touch
+    mode = "open"
+    args = ["--yubikey", {{ $keepassxcYubikey | quote }}]
+{{- end }}
 {{- end }}
 {{- if and (eq .chezmoi.os "windows") (lookPath "pwsh") }}
 
