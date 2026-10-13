@@ -81,8 +81,9 @@
 [keepassxc]
     database = {{ $keepassxcPath | quote }}
 {{- if $keepassxcYubikey }}
-    # one keepassxc-cli session per run: a single password + YubiKey touch
-    mode = "open"
+    # default cache-password mode: chezmoi asks for the password once, and
+    # keepassxc-cli does a YubiKey challenge per lookup. ("open" mode can't
+    # handle a database that needs both a password and a YubiKey.)
     args = ["--yubikey", {{ $keepassxcYubikey | quote }}]
 {{- end }}
 {{- end }}
