@@ -1,0 +1,84 @@
+# ~/.profile: executed by the command interpreter for login shells.
+# This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
+# exists.
+# see /usr/share/doc/bash/examples/startup-files for examples.
+# the files are located in the bash-doc package.
+
+# the default umask is set in /etc/profile; for setting the umask
+# for ssh logins, install and configure the libpam-umask package.
+#umask 022
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/bin" ] ; then
+    PATH="$HOME/bin:$PATH"
+fi
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/.local/bin" ] ; then
+    PATH="$HOME/.local/bin:$PATH"
+fi
+
+{{ if eq .chezmoi.os "darwin" -}}
+JETBRAINS_SCRIPTS="$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
+{{- else -}}
+JETBRAINS_SCRIPTS="$HOME/.local/share/JetBrains/Toolbox/scripts"
+{{- end }}
+if [ -d "$JETBRAINS_SCRIPTS" ]; then
+  PATH="$PATH:$JETBRAINS_SCRIPTS"
+fi
+
+CARGO_ENV="$HOME/.cargo/env"
+if [ -f "$CARGO_ENV" ]; then
+  . "$CARGO_ENV"
+fi
+
+EXERCISM_HOME="$HOME/.local/install/exercism"
+if [ -d "$EXERCISM_HOME" ]; then
+  PATH="$PATH:$EXERCISM_HOME"
+fi
+
+{{ if eq .chezmoi.os "darwin" -}}
+if [ -x /opt/homebrew/bin/brew ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
+GCLOUD_BIN="/opt/homebrew/share/google-cloud-sdk/bin"
+if [ -d "$GCLOUD_BIN" ]; then
+  PATH="$PATH:$GCLOUD_BIN"
+fi
+
+{{ end -}}
+# mise shims, so mise tools (e.g. nvim as $EDITOR) work outside interactive
+# shells; `mise activate` in .bashrc takes over in interactive ones
+MISE_SHIMS="$HOME/.local/share/mise/shims"
+if [ -d "$MISE_SHIMS" ]; then
+  PATH="$MISE_SHIMS:$PATH"
+fi
+
+export PATH
+
+{{ if .work -}}
+# use the system CA store (with work certs) for nodejs processes (node 22.19.0 and later)
+export NODE_USE_SYSTEM_CA=1
+
+{{ with .workJavaTrustStore -}}
+{{ $trustStore := regexReplaceAllLiteral "^~/" . "$HOME/" -}}
+# add work certs to the java truststore
+if [ -f "{{ $trustStore }}" ]; then
+  export JAVA_TOOL_OPTIONS="-Djavax.net.ssl.trustStore={{ $trustStore }}"
+fi
+{{ end -}}
+
+{{ end -}}
+export EDITOR=nvim
+
+# source interactive config on login shells
+#   MacOS, Ghostty and tmux use login shells by default.
+#   Any interactive config should check to make sure they are running
+#   interactively.
+if [ -n "$BASH_VERSION" ]; then
+  # include .bashrc if it exists
+  if [ -f "$HOME/.bashrc" ]; then
+    . "$HOME/.bashrc"
+  fi
+fi
