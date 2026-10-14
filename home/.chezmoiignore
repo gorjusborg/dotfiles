@@ -15,6 +15,6 @@ Documents/WindowsPowerShell
 .gitconfig-work
 {{ end }}
 
-{{ if not .secrets }}
-.secrets
+{{ if or (not .pushover) (eq .chezmoi.os "windows") }}
+.pushover
 {{ end }}

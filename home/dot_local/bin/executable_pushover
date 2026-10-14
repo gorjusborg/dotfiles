@@ -3,21 +3,32 @@
 
 ;; A dirty cli to send myself messages via the Pushover API
 ;; (https://pushover.net/api)
+;;
+;; Reads token, user and (optionally) url from ~/.pushover (YAML);
+;; PUSHOVER_APP_TOKEN, PUSHOVER_USER_TOKEN and PUSHOVER_URL override it.
 
 (ns pushover.core
-  (:require [babashka.http-client :as http]
-            [cheshire.core :as json]))
+  (:require [babashka.fs :as fs]
+            [babashka.http-client :as http]
+            [cheshire.core :as json]
+            [clj-yaml.core :as yaml]))
+
+(def ^:private config
+  (let [file (fs/file (fs/home) ".pushover")]
+    (when (fs/exists? file)
+      (yaml/parse-string (slurp file)))))
 
 (def ^:private vars
-  {:url (or 
-        (System/getenv "PUSHOVER_URL") 
+  {:url (or
+        (System/getenv "PUSHOVER_URL")
+        (:url config)
         "https://api.pushover.net/1/messages.json")
-  :token (System/getenv "PUSHOVER_APP_TOKEN")
-  :user (System/getenv "PUSHOVER_USER_TOKEN")})
+  :token (or (System/getenv "PUSHOVER_APP_TOKEN") (:token config))
+  :user (or (System/getenv "PUSHOVER_USER_TOKEN") (:user config))})
 
-(defn- exit 
+(defn- exit
   ([msg] (exit msg 0))
-  ([msg status] 
+  ([msg status]
    (do
       (.println *err* msg)
       (System/exit status))))
@@ -27,12 +38,12 @@
       message (or firstArg (slurp "/dev/stdin"))
       url (:url vars)
       token (:token vars)
-      user (:user vars)] 
+      user (:user vars)]
 
       (try
         (do
-          (http/post 
-            (:url vars) 
+          (http/post
+            (:url vars)
             {:headers {:content-type "application/json"}
              :body (json/encode {:token token :user user :message message})})
           (exit (str "sent")))

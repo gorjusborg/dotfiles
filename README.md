@@ -31,7 +31,8 @@ editor/shell tools.
 - personal git SSH key; on work machines also the work SSH key, work git
   name/email, and an optional Java truststore
 - KeePassXC database path (blank disables secrets), and if set, an optional
-  YubiKey slot[:serial] for challenge-response
+  YubiKey slot[:serial] for challenge-response, and whether to set up
+  Pushover
 
 Re-ask with `chezmoi init --prompt`. OS, distro, WSL, and containers are
 detected automatically.
@@ -42,8 +43,8 @@ Work-specific shell setup that doesn't belong in this repo goes in
 ## Secrets
 
 Secrets come only from KeePassXC at apply time; nothing secret is committed.
-`~/.secrets` (mode 0600) is rendered from KeePassXC entries and sourced by
-`.bashrc`.
+With Pushover enabled, its tokens are rendered to `~/.pushover` (YAML,
+mode 0600), which `~/.local/bin/pushover` reads.
 
 Enable the secret-scanning pre-commit hook in each clone you commit from:
 

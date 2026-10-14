@@ -39,6 +39,7 @@
 {{- $workJavaTrustStore := "" -}}
 {{- $keepassxcDb := "" -}}
 {{- $keepassxcYubikey := "" -}}
+{{- $pushover := false -}}
 {{- if not $ephemeral -}}
 {{-   $work = promptBoolOnce . "work" "Work machine" false -}}
 {{-   $notesDir = promptStringOnce . "notesDir" "Notes directory (absolute path)" $notesDir -}}
@@ -52,6 +53,7 @@
 {{-   $keepassxcDb = promptStringOnce . "keepassxcDb" "KeePassXC database (absolute path, blank to disable secrets)" "" -}}
 {{-   if $keepassxcDb -}}
 {{-     $keepassxcYubikey = promptStringOnce . "keepassxcYubikey" "KeePassXC YubiKey slot[:serial] (blank for none)" "" -}}
+{{-     $pushover = promptBoolOnce . "pushover" "Set up Pushover (tokens from KeePassXC)" false -}}
 {{-   end -}}
 {{- end -}}
 {{- range $name, $path := dict "notesDir" $notesDir "sshKeyPersonal" $sshKeyPersonal "sshKeyWork" $sshKeyWork "workJavaTrustStore" $workJavaTrustStore "keepassxcDb" $keepassxcDb -}}
@@ -76,6 +78,7 @@
     workJavaTrustStore = {{ $workJavaTrustStore | quote }}
     keepassxcDb = {{ $keepassxcDb | quote }}
     keepassxcYubikey = {{ $keepassxcYubikey | quote }}
+    pushover = {{ $pushover }}
 
 [add]
     secrets = "error"
