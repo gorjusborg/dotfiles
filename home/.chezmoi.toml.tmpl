@@ -28,9 +28,11 @@
 {{- /* Containers (devcontainers, Codespaces, docker/podman) get a minimal, prompt-free, secret-free setup */ -}}
 {{- $ephemeral := or (env "CODESPACES") (env "REMOTE_CONTAINERS") (stat "/.dockerenv") (stat "/run/.containerenv") | not | not -}}
 
+{{- /* All path answers are absolute; defaults are built from the home directory. */ -}}
+{{- $defaultSshKey := joinPath .chezmoi.homeDir ".ssh" "id_ed25519" -}}
 {{- $work := false -}}
-{{- $notesDir := "mega/tn/notes" -}}
-{{- $sshKeyPersonal := "~/.ssh/id_ed25519" -}}
+{{- $notesDir := joinPath .chezmoi.homeDir "mega" "tn" "notes" -}}
+{{- $sshKeyPersonal := $defaultSshKey -}}
 {{- $sshKeyWork := "" -}}
 {{- $workGitName := "" -}}
 {{- $workGitEmail := "" -}}
@@ -39,24 +41,25 @@
 {{- $keepassxcYubikey := "" -}}
 {{- if not $ephemeral -}}
 {{-   $work = promptBoolOnce . "work" "Work machine" false -}}
-{{-   $notesDir = promptStringOnce . "notesDir" "Notes directory (relative to home, ~/..., or absolute)" $notesDir -}}
-{{-   $sshKeyPersonal = promptStringOnce . "sshKeyPersonal" "Personal git SSH key" $sshKeyPersonal -}}
+{{-   $notesDir = promptStringOnce . "notesDir" "Notes directory (absolute path)" $notesDir -}}
+{{-   $sshKeyPersonal = promptStringOnce . "sshKeyPersonal" "Personal git SSH key (absolute path)" $sshKeyPersonal -}}
 {{-   if $work -}}
-{{-     $sshKeyWork = promptStringOnce . "sshKeyWork" "Work git SSH key" "~/.ssh/id_ed25519" -}}
+{{-     $sshKeyWork = promptStringOnce . "sshKeyWork" "Work git SSH key (absolute path)" $defaultSshKey -}}
 {{-     $workGitName = promptStringOnce . "workGitName" "Work git name" -}}
 {{-     $workGitEmail = promptStringOnce . "workGitEmail" "Work git email" -}}
-{{-     $workJavaTrustStore = promptStringOnce . "workJavaTrustStore" "Work Java truststore path (blank for none)" "" -}}
+{{-     $workJavaTrustStore = promptStringOnce . "workJavaTrustStore" "Work Java truststore (absolute path, blank for none)" "" -}}
 {{-   end -}}
-{{-   $keepassxcDb = promptStringOnce . "keepassxcDb" "KeePassXC database path (blank to disable secrets)" "" -}}
+{{-   $keepassxcDb = promptStringOnce . "keepassxcDb" "KeePassXC database (absolute path, blank to disable secrets)" "" -}}
 {{-   if $keepassxcDb -}}
 {{-     $keepassxcYubikey = promptStringOnce . "keepassxcYubikey" "KeePassXC YubiKey slot[:serial] (blank for none)" "" -}}
 {{-   end -}}
 {{- end -}}
-{{- $secrets := ne $keepassxcDb "" -}}
-{{- $keepassxcPath := $keepassxcDb -}}
-{{- if hasPrefix "~/" $keepassxcPath -}}
-{{-   $keepassxcPath = joinPath .chezmoi.homeDir (trimPrefix "~/" $keepassxcPath) -}}
+{{- range $name, $path := dict "notesDir" $notesDir "sshKeyPersonal" $sshKeyPersonal "sshKeyWork" $sshKeyWork "workJavaTrustStore" $workJavaTrustStore "keepassxcDb" $keepassxcDb -}}
+{{-   if and $path (not (osIsAbs $path)) -}}
+{{-     fail (printf "%s must be an absolute path, got %q (re-answer with `chezmoi init --prompt`)" $name $path) -}}
+{{-   end -}}
 {{- end -}}
+{{- $secrets := ne $keepassxcDb "" -}}
 
 [data]
     osid = {{ $osid | quote }}
@@ -79,7 +82,7 @@
 {{- if $secrets }}
 
 [keepassxc]
-    database = {{ $keepassxcPath | quote }}
+    database = {{ $keepassxcDb | quote }}
 {{- if $keepassxcYubikey }}
     # default cache-password mode: chezmoi asks for the password once, and
     # keepassxc-cli does a YubiKey challenge per lookup. ("open" mode can't

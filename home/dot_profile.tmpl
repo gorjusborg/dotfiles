@@ -62,10 +62,9 @@ export PATH
 export NODE_USE_SYSTEM_CA=1
 
 {{ with .workJavaTrustStore -}}
-{{ $trustStore := regexReplaceAllLiteral "^~/" . "$HOME/" -}}
 # add work certs to the java truststore
-if [ -f "{{ $trustStore }}" ]; then
-  export JAVA_TOOL_OPTIONS="-Djavax.net.ssl.trustStore={{ $trustStore }}"
+if [ -f {{ . | quote }} ]; then
+  export JAVA_TOOL_OPTIONS={{ printf "-Djavax.net.ssl.trustStore=%s" . | quote }}
 fi
 {{ end -}}
 
