@@ -50,9 +50,20 @@
 {{-     $workGitEmail = promptStringOnce . "workGitEmail" "Work git email" -}}
 {{-     $workJavaTrustStore = promptStringOnce . "workJavaTrustStore" "Work Java truststore (absolute path, blank for none)" "" -}}
 {{-   end -}}
-{{-   $keepassxcDb = promptStringOnce . "keepassxcDb" "KeePassXC database (absolute path, blank to disable secrets)" "" -}}
+{{- /* A blank answer takes the default, so "none" is how to opt out. The database default is offered only where it exists. */ -}}
+{{-   $defaultKeepassxcDb := joinPath .chezmoi.homeDir ".keepass" "brandon-personal-ubk.kdbx" -}}
+{{-   if not (stat $defaultKeepassxcDb) -}}
+{{-     $defaultKeepassxcDb = "" -}}
+{{-   end -}}
+{{-   $keepassxcDb = promptStringOnce . "keepassxcDb" "KeePassXC database (absolute path, \"none\" to disable secrets)" $defaultKeepassxcDb -}}
+{{-   if eq $keepassxcDb "none" -}}
+{{-     $keepassxcDb = "" -}}
+{{-   end -}}
 {{-   if $keepassxcDb -}}
-{{-     $keepassxcYubikey = promptStringOnce . "keepassxcYubikey" "KeePassXC YubiKey slot[:serial] (blank for none)" "" -}}
+{{-     $keepassxcYubikey = promptStringOnce . "keepassxcYubikey" "KeePassXC YubiKey slot[:serial] (\"none\" for no YubiKey)" "2" -}}
+{{-     if eq $keepassxcYubikey "none" -}}
+{{-       $keepassxcYubikey = "" -}}
+{{-     end -}}
 {{-     $pushover = promptBoolOnce . "pushover" "Set up Pushover (tokens from KeePassXC)" false -}}
 {{-   end -}}
 {{- end -}}
