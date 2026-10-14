@@ -196,7 +196,13 @@ if [ -f "$HOME/.devenv" ]; then
   . "$HOME/.devenv"
 fi
 
-export TN_NOTES_DIR="$HOME/{{ .notesDir }}"
+{{ $notesDir := .notesDir -}}
+{{ if hasPrefix "~/" $notesDir -}}
+{{   $notesDir = printf "$HOME/%s" (trimPrefix "~/" $notesDir) -}}
+{{ else if not (hasPrefix "/" $notesDir) -}}
+{{   $notesDir = printf "$HOME/%s" $notesDir -}}
+{{ end -}}
+export TN_NOTES_DIR="{{ $notesDir }}"
 
 alias nv="nvim"
 alias nvc="nvim --clean"

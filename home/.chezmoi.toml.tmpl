@@ -39,7 +39,7 @@
 {{- $keepassxcYubikey := "" -}}
 {{- if not $ephemeral -}}
 {{-   $work = promptBoolOnce . "work" "Work machine" false -}}
-{{-   $notesDir = promptStringOnce . "notesDir" "Notes directory, relative to home" $notesDir -}}
+{{-   $notesDir = promptStringOnce . "notesDir" "Notes directory (relative to home, ~/..., or absolute)" $notesDir -}}
 {{-   $sshKeyPersonal = promptStringOnce . "sshKeyPersonal" "Personal git SSH key" $sshKeyPersonal -}}
 {{-   if $work -}}
 {{-     $sshKeyWork = promptStringOnce . "sshKeyWork" "Work git SSH key" "~/.ssh/id_ed25519" -}}
