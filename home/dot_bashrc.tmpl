@@ -191,22 +191,10 @@ if cmd_exists zoxide; then
   eval "$(zoxide init bash)"
 fi
 
-# set up dev env if dotfile exists
-if [ -f "$HOME/.devenv" ]; then
-  . "$HOME/.devenv"
-fi
-
 export TN_NOTES_DIR={{ .notesDir | quote }}
 
 alias nv="nvim"
 alias nvc="nvim --clean"
-
-if [ -f "$HOME/.code-maat/code-maat-1.0.5-SNAPSHOT-standalone.jar" ]; then
-  alias maat="java -jar $HOME/.code-maat/code-maat-1.0.5-SNAPSHOT-standalone.jar"
-fi
-if [ -f "$HOME/.schemaspy/schemaspy.jar" ]; then
-  alias schemaspy="java -jar $HOME/.schemaspy/schemaspy.jar"
-fi
 
 function vpr() {
   local base_branch="${1:-main}"
