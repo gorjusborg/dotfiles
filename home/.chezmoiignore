@@ -18,3 +18,7 @@ Documents/WindowsPowerShell
 {{ if or (not .pushover) (eq .chezmoi.os "windows") }}
 .pushover
 {{ end }}
+
+{{ if not .secrets }}
+.config/netid
+{{ end }}

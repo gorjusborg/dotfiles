@@ -187,6 +187,16 @@ fi
 
 export TN_NOTES_DIR={{ .notesDir | quote }}
 
+# identify the current network (see ~/.config/netid/netid.yaml)
+export NETID="$(netid 2>/dev/null)"
+# NETID can fall back to the raw DHCP search domain, so keep it from becoming a path
+case "$NETID" in *[!A-Za-z0-9._-]*) NETID= ;; esac
+if [ -n "$NETID" ] && [ -f "$HOME/.config/netid/$NETID.env" ]; then
+  set -a
+  . "$HOME/.config/netid/$NETID.env"
+  set +a
+fi
+
 alias nv="nvim"
 alias nvc="nvim --clean"
 
