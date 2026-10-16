@@ -1,0 +1,60 @@
+#!/usr/bin/env bb
+
+(require '[babashka.fs :as fs]
+         '[babashka.process :refer [sh]]
+         '[clj-yaml.core :as yaml]
+         '[clojure.string :as str])
+
+(def config-path
+  (or (System/getenv "NETID_CONFIG")
+      (str (fs/path (or (System/getenv "XDG_CONFIG_HOME")
+                        (fs/path (System/getProperty "user.home") ".config"))
+                    "netid" "netid.yaml"))))
+
+(defn- run [& args]
+  (try
+    (let [{:keys [exit out]} (apply sh args)]
+      (when (zero? exit) out))
+    (catch Exception _ nil)))
+
+(defn- resolv-conf-domain []
+  (some->> (when (fs/readable? "/etc/resolv.conf") (slurp "/etc/resolv.conf"))
+           (re-find #"(?m)^(?:search|domain)\s+(\S+)")
+           second))
+
+;; `resolvectl domain` prints lines like "Link 2 (eth0): corp.example.com ~routing-only"
+(defn- resolvectl-domain []
+  (some->> (run "resolvectl" "domain")
+           str/split-lines
+           (mapcat #(rest (str/split % #":" 2)))
+           (mapcat #(str/split (str/trim %) #"\s+"))
+           (remove #(or (str/blank? %) (str/starts-with? % "~")))
+           first))
+
+(defn- search-domain []
+  (let [os (System/getProperty "os.name")]
+    (cond
+      (str/includes? os "Mac")
+      (some->> (run "scutil" "--dns")
+               (re-find #"search domain\[0\]\s*:\s*(\S+)")
+               second)
+
+      (str/includes? os "Windows")
+      (some->> (run "ipconfig")
+               (re-find #"Connection-specific DNS Suffix[ .]*:\s*(\S+)")
+               second)
+
+      :else
+      (or (resolvectl-domain) (resolv-conf-domain)))))
+
+(defn- lookup [id]
+  (when (fs/readable? config-path)
+    (let [mapping (try (yaml/parse-string (slurp config-path) :keywords false)
+                       (catch Exception _ nil))
+          value   (when (map? mapping) (get mapping id))]
+      (when (some? value)
+        (let [s (str/trim (str value))]
+          (when-not (str/blank? s) s))))))
+
+(let [id (search-domain)]
+  (println (or (and id (lookup id)) id "")))
