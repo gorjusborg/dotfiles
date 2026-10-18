@@ -57,8 +57,6 @@
 
 [init]
   defaultBranch = main
-[core]
-  excludesfile = ~/.gitignore
 
 [tig "color"]
   cursor = black blue bold

@@ -1,0 +1,21 @@
+# Global git ignore, read by git from its default location
+# (~/.config/git/ignore) without any core.excludesFile setting.
+
+# Claude Code per-user settings
+**/.claude/settings.local.json
+
+# Clojure editor caches (clojure-lsp, clj-kondo); their config.edn files stay
+# visible so projects can commit them
+.clj-kondo/.cache/
+.lsp/.cache/
+{{- if eq .chezmoi.os "darwin" }}
+
+# macOS Finder metadata, and AppleDouble files on non-Mac filesystems
+.DS_Store
+._*
+{{- else if eq .chezmoi.os "windows" }}
+
+# Windows Explorer metadata
+Thumbs.db
+desktop.ini
+{{- end }}

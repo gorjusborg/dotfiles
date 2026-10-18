@@ -1,0 +1,23 @@
+{{ if ne .chezmoi.os "windows" -}}
+#!/bin/sh
+# Generate kpsync.bb's bash completion on new machines and whenever kpsync.bb
+# changes.
+# kpsync.bb hash: {{ include "dot_local/bin/executable_kpsync.bb" | sha256sum }}
+# mise available: {{ lookPath "mise" | not | not }}
+set -eu
+
+kpsync="$HOME/.local/bin/kpsync.bb"
+completions="${XDG_DATA_HOME:-$HOME/.local/share}/bash-completion/completions"
+
+if command -v bb >/dev/null 2>&1; then
+  run() { "$@"; }
+elif command -v mise >/dev/null 2>&1; then
+  run() { mise exec -- "$@"; }
+else
+  echo "bb not found; skipping kpsync.bb completion" >&2
+  exit 0
+fi
+
+mkdir -p "$completions"
+run "$kpsync" completion > "$completions/kpsync.bb"
+{{ end -}}
