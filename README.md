@@ -47,7 +47,10 @@ Secrets come only from KeePassXC at apply time; nothing secret is committed.
 With Pushover enabled, its tokens are rendered to `~/.pushover` (YAML,
 mode 0600), which `~/.local/bin/pushover` reads.
 
-Enable the secret-scanning pre-commit hook in each clone you commit from:
+A gitleaks pre-commit hook in `.githooks/` blocks commits that contain
+secrets. `chezmoi apply` enables it for the source clone once per machine
+(`run_once_githooks.sh`). To enable it by hand, e.g. in another
+clone or on Windows:
 
 ```sh
 git config core.hooksPath .githooks

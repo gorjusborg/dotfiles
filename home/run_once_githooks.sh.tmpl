@@ -1,0 +1,9 @@
+{{ if ne .chezmoi.os "windows" -}}
+#!/bin/sh
+# Point this clone of the dotfiles repo at its committed hooks (the gitleaks
+# secret scan in .githooks/pre-commit). Reruns if the working tree moves.
+# working tree: {{ .chezmoi.workingTree }}
+set -eu
+
+git -C {{ .chezmoi.workingTree | quote }} config core.hooksPath .githooks
+{{ end -}}
