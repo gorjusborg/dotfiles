@@ -19,6 +19,7 @@ Documents/WindowsPowerShell
 .pushover
 {{ end }}
 
-{{ if not .secrets }}
-.config/netid
+{{ if not (and .secrets .work) }}
+.config/mise/config.idexx.toml
+.config/mise/config.home.toml
 {{ end }}

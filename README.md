@@ -41,6 +41,17 @@ detected automatically.
 Work-specific shell setup that doesn't belong in this repo goes in
 `~/.work.bashrc`, which `.bashrc` sources if present.
 
+## Environment profiles
+
+Opt-in sets of environment variables are mise profiles: setting `MISE_ENV`
+makes mise also load `~/.config/mise/config.$MISE_ENV.toml` and apply its
+`[env]`. Switch with `export MISE_ENV=<profile>` (PowerShell:
+`$env:MISE_ENV = "<profile>"`); to start a machine in one, set it in
+`~/.work.bashrc`.
+
+- `idexx` and `home` (work machines with secrets): set `IVLS_DEV_IP` (see
+  [KeePassXC entries](#keepassxc-entries)).
+
 ## Secrets
 
 Secrets come only from KeePassXC at apply time; nothing secret is committed.
@@ -55,6 +66,18 @@ clone or on Windows:
 ```sh
 git config core.hooksPath .githooks
 ```
+
+### KeePassXC entries
+
+`chezmoi apply` fails on a machine whose database is missing an entry it
+needs:
+
+| Entry | Field | Used by | Needed when |
+|---|---|---|---|
+| `Pushover 'phone' App` | password | `~/.pushover` | Pushover enabled |
+| `Pushover` | attribute `user key` | `~/.pushover` | Pushover enabled |
+| `ivls` | attribute `IVLS_DEV_IP_IDEXX` | `~/.config/mise/config.idexx.toml` | work machine with secrets |
+| `ivls` | attribute `IVLS_DEV_IP_HOME` | `~/.config/mise/config.home.toml` | work machine with secrets |
 
 ## Tools
 
