@@ -71,13 +71,10 @@ fi
 {{ end -}}
 export EDITOR=nvim
 
-# source interactive config on login shells
-#   MacOS, Ghostty and tmux use login shells by default.
-#   Any interactive config should check to make sure they are running
-#   interactively.
-if [ -n "$BASH_VERSION" ]; then
-  # include .bashrc if it exists
-  if [ -f "$HOME/.bashrc" ]; then
-    . "$HOME/.bashrc"
-  fi
+# per-machine environment, not managed by chezmoi (POSIX sh syntax)
+if [ -f "$HOME/.profile.local" ]; then
+  . "$HOME/.profile.local"
 fi
+
+# ~/.bashrc is sourced by ~/.bash_profile, not here, so non-bash readers of
+# this file (sh, display managers) only get the environment.

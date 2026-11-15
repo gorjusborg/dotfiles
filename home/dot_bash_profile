@@ -1,0 +1,16 @@
+# ~/.bash_profile: read by bash login shells (instead of ~/.profile).
+#   macOS, Ghostty and tmux start login shells by default.
+#
+# Keep this file tiny:
+#   ~/.profile  environment (POSIX sh), read once per login
+#   ~/.bashrc   interactive bash config, read by every interactive shell
+# Each sources an unmanaged ~/.<name>.local at its end for per-machine config.
+
+[ -f "$HOME/.profile" ] && . "$HOME/.profile"
+
+# per-machine login-shell config, not managed by chezmoi.
+# Sourced before ~/.bashrc, which may exec tmux and never return.
+[ -f "$HOME/.bash_profile.local" ] && . "$HOME/.bash_profile.local"
+
+# ~/.bashrc returns early itself when the shell isn't interactive
+[ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc"

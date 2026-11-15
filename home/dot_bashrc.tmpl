@@ -215,3 +215,8 @@ fi
 
 # colima / docker
 #export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock" # using docker desktop currently
+
+# per-machine interactive config, not managed by chezmoi (keep last)
+if [ -f "$HOME/.bashrc.local" ]; then
+  . "$HOME/.bashrc.local"
+fi
