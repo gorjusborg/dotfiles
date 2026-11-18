@@ -1,0 +1,17 @@
+{{ if and (ne .chezmoi.os "windows") .secrets -}}
+#!/bin/sh
+# Write the git SSH public keys to the paths the gitconfigs pass to `ssh -i`,
+# whenever they change in KeePassXC. Each key is an attachment named like the
+# .pub file; the private keys stay in KeePassXC and reach ssh via its agent.
+set -eu
+umask 022
+{{- range $path, $entry := dict .sshKeyPersonal .sshKeyPersonalEntry .sshKeyWork .sshKeyWorkEntry }}
+{{-   if and $path $entry }}
+
+mkdir -p {{ dir $path | squote }}
+cat > {{ $path | squote }} <<'PUBKEY'
+{{ keepassxcAttachment $entry (base $path) | trim }}
+PUBKEY
+{{-   end }}
+{{- end }}
+{{ end -}}

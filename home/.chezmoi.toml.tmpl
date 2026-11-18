@@ -29,7 +29,7 @@
 {{- $ephemeral := or (env "CODESPACES") (env "REMOTE_CONTAINERS") (stat "/.dockerenv") (stat "/run/.containerenv") | not | not -}}
 
 {{- /* All path answers are absolute; defaults are built from the home directory. */ -}}
-{{- $defaultSshKey := joinPath .chezmoi.homeDir ".ssh" "id_ed25519" -}}
+{{- $defaultSshKey := joinPath .chezmoi.homeDir ".ssh" "id_ed25519.pub" -}}
 {{- $work := false -}}
 {{- $notesDir := joinPath .chezmoi.homeDir "mega" "tn" "notes" -}}
 {{- $sshKeyPersonal := $defaultSshKey -}}
@@ -40,12 +40,14 @@
 {{- $keepassxcDb := "" -}}
 {{- $keepassxcYubikey := "" -}}
 {{- $pushover := false -}}
+{{- $sshKeyPersonalEntry := "" -}}
+{{- $sshKeyWorkEntry := "" -}}
 {{- if not $ephemeral -}}
 {{-   $work = promptBoolOnce . "work" "Work machine" false -}}
 {{-   $notesDir = promptStringOnce . "notesDir" "Notes directory (absolute path)" $notesDir -}}
-{{-   $sshKeyPersonal = promptStringOnce . "sshKeyPersonal" "Personal git SSH key (absolute path)" $sshKeyPersonal -}}
+{{-   $sshKeyPersonal = promptStringOnce . "sshKeyPersonal" "Personal git SSH public key (absolute path to .pub; private key lives in ssh-agent)" $sshKeyPersonal -}}
 {{-   if $work -}}
-{{-     $sshKeyWork = promptStringOnce . "sshKeyWork" "Work git SSH key (absolute path)" $defaultSshKey -}}
+{{-     $sshKeyWork = promptStringOnce . "sshKeyWork" "Work git SSH public key (absolute path to .pub; private key lives in ssh-agent)" $defaultSshKey -}}
 {{-     $workGitName = promptStringOnce . "workGitName" "Work git name" -}}
 {{-     $workGitEmail = promptStringOnce . "workGitEmail" "Work git email" -}}
 {{-     $workJavaTrustStore = promptStringOnce . "workJavaTrustStore" "Work Java truststore (absolute path, blank for none)" "" -}}
@@ -63,6 +65,11 @@
 {{-     $keepassxcYubikey = promptStringOnce . "keepassxcYubikey" "KeePassXC YubiKey slot[:serial] (\"none\" for no YubiKey)" "2" -}}
 {{-     if eq $keepassxcYubikey "none" -}}
 {{-       $keepassxcYubikey = "" -}}
+{{-     end -}}
+{{- /* Each entry holds its public key as an attachment named like the .pub file (e.g. "gorjusborg.pub"); apply writes it to that path. */ -}}
+{{-     $sshKeyPersonalEntry = promptStringOnce . "sshKeyPersonalEntry" "KeePassXC entry with the personal SSH public key attached" (printf "ssh - %s" (base $sshKeyPersonal | trimSuffix ".pub")) -}}
+{{-     if $work -}}
+{{-       $sshKeyWorkEntry = promptStringOnce . "sshKeyWorkEntry" "KeePassXC entry with the work SSH public key attached" (printf "ssh - %s" (base $sshKeyWork | trimSuffix ".pub")) -}}
 {{-     end -}}
 {{-     $pushover = promptBoolOnce . "pushover" "Set up Pushover (tokens from KeePassXC)" false -}}
 {{-   end -}}
@@ -84,6 +91,8 @@
     notesDir = {{ $notesDir | quote }}
     sshKeyPersonal = {{ $sshKeyPersonal | quote }}
     sshKeyWork = {{ $sshKeyWork | quote }}
+    sshKeyPersonalEntry = {{ $sshKeyPersonalEntry | quote }}
+    sshKeyWorkEntry = {{ $sshKeyWorkEntry | quote }}
     workGitName = {{ $workGitName | quote }}
     workGitEmail = {{ $workGitEmail | quote }}
     workJavaTrustStore = {{ $workJavaTrustStore | quote }}
